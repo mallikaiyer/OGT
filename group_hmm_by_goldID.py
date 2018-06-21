@@ -29,13 +29,13 @@ for row in csv.reader(file(GOLD_IDS_TO_GENBANK)):
     gold2genbank[goldID].add(genbankID)
 
 for goldID, genbankset in gold2genbank.iteritems():
-    print goldID
+    # print goldID
     # concatenate all HMM.out files from all genbank entries into one HMM file.
     all_genbank_hmm_hits_fn = os.path.join(hmm_output_dir, "by_goldid", goldID+"_hmmhits.out") 
     if os.path.isfile(all_genbank_hmm_hits_fn):
         os.remove(all_genbank_hmm_hits_fn)  # erase file if exists
     for genbankID in genbankset:
-        print " "+genbankID
+        # print " "+genbankID
         os.system("""egrep -v '^#' {0} | awk '{{if($1!="#")print "{1} "$0}}' >> {2}""".format(os.path.join(hmm_output_dir, "by_genbank", genbankID, "*HMM.out"), genbankID, all_genbank_hmm_hits_fn )) 
     
     # go through concatenated file, get best hit for each hmm across all genbank files
@@ -49,7 +49,6 @@ for goldID, genbankset in gold2genbank.iteritems():
             evalue = items[5]
             genbankID = items[0]
             accession = items[1]  # the actual protein sequence hit
-            print "     "+accession
             hmm_hits.setdefault(hmm, [])
             hmm_hits[hmm].append((evalue, genbankID, accession))
     # now have a dict with tuples keyed on hmm.  Go through each hmm and pick best with sorting.
@@ -74,7 +73,6 @@ for goldID, genbankset in gold2genbank.iteritems():
             # Scan through file for that id
             for record in SeqIO.parse(faa_file_handle, "fasta"):
                 if record.id == accession:
-                    print record.description
                     record.description = "{} hmmhit={} hmmevalue={} {}".format(record.id, hmm, evalue, record.description.split(None, 1)[1])
                     output_fasta.write(record.format("fasta"))
             faa_file_handle.close()
