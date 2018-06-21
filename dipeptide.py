@@ -24,8 +24,8 @@ from os import path
 from gzip import GzipFile
 import sqlite3
 
-all_genomes_path = sys.argv[1] # "/home/iyer/research/genomes_ncbi/genomes"
-output_dest = sys.argv[2] # "/home/iyer/research/dipeptide/analyses/combined_proteomes/"
+all_genomes_path = sys.argv[1] 
+output_dest = sys.argv[2] 
 db = sys.argv[3]
 conn = sqlite3.connect(db)
 c = conn.cursor()

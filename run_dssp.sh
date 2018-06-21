@@ -1,9 +1,9 @@
 #!/bin/bash
-# Diretory names should NOT end with a '/'
-DB=$1   # /home/iyer/research/sqlite3/OGT.test.db
-DSSP_OUTDIR=$2   # /home/iyer/research/modtest/outputs/dssp_out_rerun 
-MODPIPE_RESULT_DIR=$3   # /home/iyer/research/modtest/modpipe_result
-DSSP_PROGRAM=$4   # /home/software/bin/dssp
+# Directory names should NOT end with a '/'
+DB=$1   # Path to db
+DSSP_OUTDIR=$2   # Path to dir that will store dssp output
+MODPIPE_RESULT_DIR=$3   # Path to modpipe results dir
+DSSP_PROGRAM=$4   # Path to dssp program
 cd ${DSSP_OUTDIR}
 for i in `sqlite3 ${DB} "SELECT UNQ_ID, BEST_MODEL FROM BEST_MODELS;"`
 do

@@ -15,15 +15,10 @@ import sys
 import gzip
 from Bio import SeqIO
 
-#
-
-GOLD_IDS_TO_GENBANK = "/home/chris/OGT/modpipe/goldID_genbankID.csv"
-
-## e.g. /home/iyer/research/modtest/outputs/hmmcheck/by_genbank/GENBANK/HMM.out
-hmm_output_dir = "/home/iyer/research/modtest/outputs/hmmcheck"
-## eg.  /home/iyer/research/genomes_ncbi/genomes/GENBANK/*_protein.faa*
-genbank_dirs   = "/home/iyer/research/genomes_ncbi/genomes"
-fasta_output_dir = "/home/iyer/research/modtest/proteomes/proteomes_of_ten"
+GOLD_IDS_TO_GENBANK = sys.argv[1] # Path to csv file with goldID-to-genbankID mappings.
+hmm_output_dir = sys.argv[2] # Path to dir containing hmmsearch output for hmmsearch_10_genes.sh
+genbank_dirs   = sys.argv[3] # Path to dir containing all genomes.  
+fasta_output_dir = sys.argv[4] # Path to dir containing proteomes of ten proteins. 
 
 # first keep a dictionary of lists to map goldID to genbankID
 gold2genbank = {}
@@ -49,9 +44,7 @@ for goldID, genbankset in gold2genbank.iteritems():
         for line in all_genbank_hmm_hits:
             if line.startswith('#'):
                 continue
-            #print line
             items = line.split(None, 19)  # hmm output is space separated into 19 fields, and we have added one more at beginning (genbankID), with last being description
-            #print items
             hmm = items[4]
             evalue = items[5]
             genbankID = items[0]
@@ -60,12 +53,11 @@ for goldID, genbankset in gold2genbank.iteritems():
             hmm_hits.setdefault(hmm, [])
             hmm_hits[hmm].append((evalue, genbankID, accession))
     # now have a dict with tuples keyed on hmm.  Go through each hmm and pick best with sorting.
-    # write out the BEST hmm hit for each of ten hmms to a new fasta file
+    # write out one hmm hit for each of ten hmms to a new fasta file
     with open(os.path.join(fasta_output_dir, goldID+"_proteome_ten.faa"), 'w') as output_fasta:
         for hmm in sorted(hmm_hits):
-            # sort by evalue, take lowest evalue (pos 0) and we have best hit
             evalue, genbankID, accession = sorted(hmm_hits[hmm])[0]
-            # go get that specific fasta sequence, and write to output file with modified header
+            # get that specific fasta sequence, and write to output file with modified header
             faa_path = None
             for candidate_filename in os.listdir(os.path.join(genbank_dirs, genbankID)):
                 if candidate_filename.endswith(("_protein.faa.gz", "_protein.faa")):
@@ -79,14 +71,10 @@ for goldID, genbankset in gold2genbank.iteritems():
                 faa_file_handle = gzip.open(faa_path, 'r')
             else:
                 faa_file_handle = open(faa_path, 'r')
-            # dumb, but scan through file for that id
-            #print "     "+accession 
+            # Scan through file for that id
             for record in SeqIO.parse(faa_file_handle, "fasta"):
-                #print record
                 if record.id == accession:
                     print record.description
                     record.description = "{} hmmhit={} hmmevalue={} {}".format(record.id, hmm, evalue, record.description.split(None, 1)[1])
                     output_fasta.write(record.format("fasta"))
             faa_file_handle.close()
-
-    break #DEBUG
