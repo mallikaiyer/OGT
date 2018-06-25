@@ -5,7 +5,7 @@ IN: csv list of gold ID to Genbank ID mappings
     
 OUT: produce a single hmmsearch output file with all hits for all HMMs
      above TC per GoldID
-     produce a single fasta file with <= 10 records, with BEST hit above TC
+     produce a single fasta file with <= 10 records, with one hit above TC
      kept for each hmm
 """
 
