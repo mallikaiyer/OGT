@@ -15,10 +15,10 @@ import sys
 import gzip
 from Bio import SeqIO
 
-GOLD_IDS_TO_GENBANK = sys.argv[1] # Path to csv file with goldID-to-genbankID mappings.
+GOLD_IDS_TO_GENBANK = sys.argv[1] # Path to csv file with goldID-to-genbankID mappings. 
 hmm_output_dir = sys.argv[2] # Path to dir containing hmmsearch output for hmmsearch_10_genes.sh
 genbank_dirs   = sys.argv[3] # Path to dir containing all genomes.  
-fasta_output_dir = sys.argv[4] # Path to dir containing proteomes of ten proteins. 
+fasta_output_dir = sys.argv[4] # Path to dir that will contain proteomes of ten proteins. 
 
 # first keep a dictionary of lists to map goldID to genbankID
 gold2genbank = {}
@@ -38,7 +38,7 @@ for goldID, genbankset in gold2genbank.iteritems():
         # print " "+genbankID
         os.system("""egrep -v '^#' {0} | awk '{{if($1!="#")print "{1} "$0}}' >> {2}""".format(os.path.join(hmm_output_dir, "by_genbank", genbankID, "*HMM.out"), genbankID, all_genbank_hmm_hits_fn )) 
     
-    # go through concatenated file, get best hit for each hmm across all genbank files
+    # go through concatenated file, get one hit for each hmm across all genbank files. Create a dict with tuples keyed on hmm.  
     hmm_hits = {}
     with open(all_genbank_hmm_hits_fn, 'r') as all_genbank_hmm_hits:
         for line in all_genbank_hmm_hits:
@@ -51,7 +51,7 @@ for goldID, genbankset in gold2genbank.iteritems():
             accession = items[1]  # the actual protein sequence hit
             hmm_hits.setdefault(hmm, [])
             hmm_hits[hmm].append((evalue, genbankID, accession))
-    # now have a dict with tuples keyed on hmm.  Go through each hmm and pick best with sorting.
+    # Go through each hmm in dict and pick one.
     # write out one hmm hit for each of ten hmms to a new fasta file
     with open(os.path.join(fasta_output_dir, goldID+"_proteome_ten.faa"), 'w') as output_fasta:
         for hmm in sorted(hmm_hits):
